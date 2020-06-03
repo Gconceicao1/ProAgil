@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using proAgil.webApi.Data;
+using proAgil.Repository;
 
 namespace proAgil.webApi
 {
@@ -27,14 +27,15 @@ namespace proAgil.webApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<dataContext>(x => x.UseSqlite(
+            services.AddDbContext<proAgilContext>(x => x.UseSqlite(
                
                 Configuration.GetConnectionString("DefaultConnection")
                 
                 ));
-
-            services.AddCors();    
+            services.AddScoped<IproAgilRepository, ProAgilRepository>();   
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddCors(); 
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +52,7 @@ namespace proAgil.webApi
             }
 
             //app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseCors( x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             app.UseMvc();
         }

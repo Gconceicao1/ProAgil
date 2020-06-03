@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using proAgil.webApi.Data;
-using proAgil.webApi.Model;
+using proAgil.Repository;
+
 
 namespace proAgil.webApi.Controllers
 {
@@ -14,9 +14,9 @@ namespace proAgil.webApi.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        public  readonly dataContext _context;
+        public  readonly proAgilContext _context;
 
-        public ValuesController(dataContext context)
+        public ValuesController(proAgilContext context)
         {
             _context = context;
 
@@ -30,6 +30,11 @@ namespace proAgil.webApi.Controllers
             try
             {
               var results = await _context.Eventos.ToListAsync();
+                
+                if(results == null){
+                  return BadRequest("deu ruim");
+                }
+                
                 return Ok(results);  
             }
             catch (System.Exception)
@@ -47,7 +52,7 @@ namespace proAgil.webApi.Controllers
         {
           try
           { 
-              var results = await _context.Eventos.FirstOrDefaultAsync(x => x.eventoId == id);
+              var results = await _context.Eventos.FirstOrDefaultAsync(x => x.id == id);
 
               if(results == null){
                 return this.StatusCode(StatusCodes.Status404NotFound,"Este registro não existe na base de dados");

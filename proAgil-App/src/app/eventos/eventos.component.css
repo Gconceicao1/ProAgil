@@ -1,0 +1,11 @@
+th i{
+    font-size: 15pt;
+    align-items: center;
+    cursor: pointer;
+}
+th i:hover{
+    color:lightgrey;
+}
+#table-form{
+    margin-top: 10%;
+}
