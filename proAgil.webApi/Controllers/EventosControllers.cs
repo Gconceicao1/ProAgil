@@ -1,9 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using proAgil.Domain;
 using proAgil.Repository;
+using proAgil.webApi.Dtos;
 
 namespace proAgil.webApi.Controllers
 {
@@ -13,146 +16,159 @@ namespace proAgil.webApi.Controllers
     public class eventos : ControllerBase
     {
         private readonly IproAgilRepository _repo;
+        private readonly IMapper _mapper;
 
-        public eventos(IproAgilRepository repo)
+        public eventos(IproAgilRepository repo, IMapper mapper)
         {
+            _mapper = mapper;
             _repo = repo;
 
         }
         [HttpGet]
         public async Task<IActionResult> Get()
-            
-          {
-            
+        {
+
             try
             {
-              var results = await _repo.getAllEventoAsync(true);
-
-                return Ok(results);    
+                var eventos = await _repo.getAllEventoAsync(true);
+                var results = _mapper.Map<EventoDto[]>(eventos);
+                return Ok(results);
             }
             catch (System.Exception)
             {
-                
-                return this.StatusCode(StatusCodes.Status500InternalServerError,"Falha ao conectar com a base de dados, tente novamente mais tarde");
-              
-            }
-          
-          }
 
-           [HttpGet("{eventoId}")]
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Falha ao conectar com a base de dados, tente novamente mais tarde");
+
+            }
+
+        }
+
+        [HttpGet("{eventoId}")]
         public async Task<IActionResult> Get(int eventoId)
-            
-          {
-            
+
+        {
+
             try
             {
-              var results = await _repo.getAllEventoAsyncByid(eventoId,true);
-                return Ok(results);  
+                var evento = await _repo.getAllEventoAsyncByid(eventoId, true);
+                var results = _mapper.Map<EventoDto>(evento);
+                return Ok(results); 
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
-                
-                return this.StatusCode(StatusCodes.Status500InternalServerError,"Falha ao conectar com a base de dados, tente novamente mais tarde");
+
+                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Falha ao conectar com a base de dados, tente novamente mais tarde {ex.Message}" );
             }
-          
-          }
-             [HttpGet("getByTema{tema}")]
+
+        }
+        [HttpGet("getByTema{tema}")]
         public async Task<IActionResult> Get(string tema)
-            
-          {
-            
+
+        {
+
             try
             {
-              var results = await _repo.getAllEventoAsyncBytema(tema,true);
-                return Ok(results);  
+                var results = await _repo.getAllEventoAsyncBytema(tema, true);
+                return Ok(results);
             }
             catch (System.Exception)
             {
-                
-                return this.StatusCode(StatusCodes.Status500InternalServerError,"Falha ao conectar com a base de dados, tente novamente mais tarde");
-            }
-          
-          }
 
-            [HttpPost]
-        public async Task<IActionResult> Post(Evento model)
-            
-          {
-            
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Falha ao conectar com a base de dados, tente novamente mais tarde");
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post(EventoDto model)
+
+        {
+
             try
             {
-              _repo.Add(model);
+                var evento = _mapper.Map<Evento>(model);
+                _repo.Add(evento);
 
-              if(await _repo.SaveChangesAsync()){
-                  return Created($"/api/eventos/{model.id}",model);
-              }
-            
-            }
-            catch (System.Exception)
-            {
-                
-                return this.StatusCode(StatusCodes.Status500InternalServerError,"Falha ao conectar com a base de dados, tente novamente mais tarde");
-
-               
-            }
-             return BadRequest();
-          }
-             [HttpPut("{eventoId}")]
-        public async Task<IActionResult> Put(int eventoId, Evento model)
-            
-          {
-            
-            try
-            {
-                var evento = await _repo.getAllEventoAsyncByid(eventoId, false);
-                if(evento == null){
-                    return NotFound();
+                if (await _repo.SaveChangesAsync())
+                {
+                    return Created($"/api/eventos/{model.id}", _mapper.Map<EventoDto>(evento));
                 }
 
-              _repo.Update(model);
-
-              if(await _repo.SaveChangesAsync()){
-                  return Created($"/api/eventos/{model.id}",model);
-              }
-            
             }
-            catch (System.Exception)
+            catch (System.Exception ex)
             {
-                
-                return this.StatusCode(StatusCodes.Status500InternalServerError,"Falha ao conectar com a base de dados, tente novamente mais tarde");
 
-               
+                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Falha ao conectar com a base de dados, tente novamente mais tarde {ex.Message}");
+
+
             }
-             return BadRequest();
-          }
+            return BadRequest();
+        }
+        [HttpPut ("{id}")]
+        public async Task<IActionResult> Put(int id, EventoDto model)
 
-              [HttpDelete]
-        public async Task<IActionResult> Delete(int eventoId)
-            
-          {
-            
+        {
+
             try
             {
-                var evento = await _repo.getAllEventoAsyncByid(eventoId, false);
-                if(evento == null){
+                var evento = await _repo.getAllEventoAsyncByid(id, false);
+                
+            
+                if (evento == null)
+                {
+                    return NotFound();
+
+                }
+                _mapper.Map(model, evento);
+
+                _repo.Update(evento);
+
+                if (await _repo.SaveChangesAsync())
+                {
+                    return Created($"/api/eventos/{model.id}", _mapper.Map<EventoDto>(evento));
+                } 
+
+            }
+            catch (System.Exception ex)
+            {
+
+                return this.StatusCode(StatusCodes.Status500InternalServerError, $"Falha ao conectar com a base de dados, tente novamente mais tarde {ex.Message}");
+
+
+            }
+            return BadRequest();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+
+        {
+
+            try
+            {
+                var evento = await _repo.getAllEventoAsyncByid(id, false);
+                if (evento == null)
+                {
                     return NotFound("exclusão falhou");
                 }
 
-              _repo.Delete(evento);
+                _repo.Delete(evento);
 
-              if(await _repo.SaveChangesAsync()){
-                  return Ok();
-              }
-            
+                if (await _repo.SaveChangesAsync())
+                {
+                    return Ok(StatusCode(StatusCodes.Status200OK, "excluido com sucesso"));
+                    
+                }
+
             }
             catch (System.Exception)
             {
-                
-                return this.StatusCode(StatusCodes.Status500InternalServerError,"Falha ao conectar com a base de dados, tente novamente mais tarde");
 
-               
+                return this.StatusCode(StatusCodes.Status500InternalServerError, "Falha ao conectar com a base de dados, tente novamente mais tarde");
+
+
             }
-             return BadRequest();
-          }
+            return BadRequest();
+        }
     }
 }

@@ -9,3 +9,7 @@ th i:hover{
 #table-form{
     margin-top: 10%;
 }
+.alert.alert-primary{
+    width: 60px;
+    height: 60px;
+}
