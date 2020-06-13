@@ -10,12 +10,17 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { AlertModule } from 'ngx-bootstrap/alert';
+import { ToastrModule } from 'ngx-toastr';
 // Services
 import { EventoService } from './_services/Evento.service';
 // Components
 import { AppComponent } from './app.component';
-import { EventosComponent } from './eventos/eventos.component';
 import { NavMenuComponent } from './navMenu/navMenu.component';
+import { EventosComponent } from './eventos/eventos.component';
+import { PalestrantesComponent } from './palestrantes/palestrantes.component';
+import { DashboardsComponent } from './dashboards/dashboards.component';
+import { ContatoComponent } from './contato/contato.component';
+import {TituloComponent } from './_shared/titulo/titulo.component';
 // Pipes
 import { DateTimeFormatPipePipe } from './_helps/DateTimeFormatPipe.pipe';
 
@@ -24,9 +29,13 @@ import { DateTimeFormatPipePipe } from './_helps/DateTimeFormatPipe.pipe';
 @NgModule({
    declarations: [
       AppComponent,
-      EventosComponent,
       NavMenuComponent,
-      DateTimeFormatPipePipe,
+      EventosComponent,
+      PalestrantesComponent,
+      DashboardsComponent,
+      ContatoComponent,
+      TituloComponent,
+      DateTimeFormatPipePipe
    ],
    imports: [
       BrowserModule,
@@ -39,8 +48,10 @@ import { DateTimeFormatPipePipe } from './_helps/DateTimeFormatPipe.pipe';
       BsDropdownModule.forRoot(),
       TooltipModule.forRoot(),
       ModalModule.forRoot(),
-      ReactiveFormsModule
+      ReactiveFormsModule,
+      ToastrModule.forRoot({ timeOut: 10000, positionClass: 'toast-bottom-right', preventDuplicates: true})
    ],
+
    providers: [
       EventoService
    ],

@@ -7,6 +7,7 @@ import { ptBrLocale } from 'ngx-bootstrap/locale';
 import { BsLocaleService } from 'ngx-bootstrap/datepicker';
 import { defineLocale, } from 'ngx-bootstrap/chronos';
 import { TmplAstTemplate } from '@angular/compiler';
+import { ToastContainerDirective, ToastrService } from 'ngx-toastr';
 
 
 defineLocale('pt-br', ptBrLocale);
@@ -18,6 +19,8 @@ defineLocale('pt-br', ptBrLocale);
   styleUrls: ['./eventos.component.css']
 })
 export class EventosComponent implements OnInit {
+
+  titulo = 'Eventos';
   eventos: Evento[];
   evento: Evento;
   imagemLargura = 50;
@@ -30,7 +33,7 @@ export class EventosComponent implements OnInit {
   _filtroLista = '';
   modalTitle = '';
   bodyDeletarEvento = '';
-
+  dataEvento = '';
 
 
 
@@ -38,7 +41,8 @@ export class EventosComponent implements OnInit {
     private eventoService: EventoService,
     private modalService: BsModalService,
     private fb: FormBuilder,
-    private localeService: BsLocaleService
+    private localeService: BsLocaleService,
+    private toastr: ToastrService,
     ) {
       this.localeService.use('pt-br');
     }
@@ -47,13 +51,16 @@ export class EventosComponent implements OnInit {
       this.validation();
       this.getEventos();
     }
+
+
+
     // abre e fecha o modal
     openModal(templete: any ) {
       this.registerForm.reset();
       templete.show();
     }
     // Insert
-    novoEvento(template: any){
+    novoEvento(template: any) {
       this.openModal(template);
       this.modalTitle = 'Criar Novo Evento';
       this.saveMode = 'post';
@@ -68,7 +75,7 @@ export class EventosComponent implements OnInit {
     }
     // Delete
 
-    excluirEvento(evento: Evento, template: any){
+    excluirEvento(evento: Evento, template: any) {
       this.openModal(template);
       this.evento = evento;
       this.modalTitle = 'Exluir evento';
@@ -118,7 +125,7 @@ export class EventosComponent implements OnInit {
 validation() {
 this.registerForm = this.fb.group({
   tema: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(100)]],
-  local: ['',Validators.required],
+  local: ['', Validators.required],
   dataEvento: ['', Validators.required],
   qtdePessoas: ['', [Validators.required, Validators.max(120000)]],
   imageUrl: ['', Validators.required],
@@ -129,14 +136,16 @@ this.registerForm = this.fb.group({
 }
 
 salvarAlteracao(template: any) {
- if (this.registerForm.valid) {   
-   if (this.saveMode === 'post'){
+ if (this.registerForm.valid) {
+   if (this.saveMode === 'post') {
     this.evento = Object.assign({}, this.registerForm.value);
     this.eventoService.postEvento(this.evento).subscribe((novoEvento: Evento) => {
       console.log(novoEvento);
+      this.toastr.success('Evento criado com sucesso');
       template.hide();
       this.getEventos();
     }, error => {
+      this.toastr.error(`{Erro ao criar um novo evento , ${error} `);
       console.log(error);
     });
    } else {
@@ -144,22 +153,26 @@ salvarAlteracao(template: any) {
     this.eventoService.putEvento(this.evento).subscribe(
       () => {
       template.hide();
+      this.toastr.success('Evento alterado com sucesso');
       this.getEventos();
     }, error => {
+      this.toastr.error(`{Erro ao alterar evento , ${error} `);
       console.log(error);
     });
    }
  }
 }
 
-confirmeDelete(template : any){
+confirmeDelete(template: any) {
  this.eventoService.deleteEvento(this.evento.id).subscribe(
    () => {
     template.hide();
     this.getEventos();
-   }, error =>{
+    this.toastr.success('Evento excluido com sucesso');
+   }, error => {
     console.log(error);
-   }  
+    this.toastr.error(`{Erro ao alterar evento , ${error} `);
+   }
  );
 }
 

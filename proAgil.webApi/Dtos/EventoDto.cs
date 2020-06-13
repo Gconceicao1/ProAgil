@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -21,7 +22,7 @@ namespace proAgil.webApi.Dtos
         public int qtdePessoas { get; set; }
 
         [Required (ErrorMessage= "o campo {0} é obrigatório")]
-        public string dataEvento { get; set; }
+        public DateTime dataEvento { get; set; }
 
         public string imageUrl{ get; set; }
 
